@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ecommerce_app/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -37,17 +38,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  // void initState() {
-  // super.initState();
-  //Timer(
-  //const Duration(seconds: 3),
-  //() => Navigator.pushReplacement(
-  // context,
-  // REPLACE WITH LOGIN OR REGISTER PAGE
-  // MaterialPageRoute(builder: (context) => const LoginPage()),
-  //),
-  //);
-  // }
+  void initState() {
+    super.initState();
+    Timer(
+      const Duration(seconds: 3),
+      () => Navigator.pushReplacement(
+        context,
+        // REPLACE WITH LOGIN OR REGISTER PAGE
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
