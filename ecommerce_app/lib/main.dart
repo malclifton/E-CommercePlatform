@@ -1,8 +1,10 @@
 import 'dart:async';
-import 'package:ecommerce_app/main_screen.dart';
+import 'package:ecommerce_app/bottom_nav_controller.dart';
+import 'package:ecommerce_app/models/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,13 +19,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ECommerce App',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
+    return ChangeNotifierProvider(
+      create: (context) => Cart(),
+      builder: (context, child) => const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MyHomePage(),
       ),
-      home: const MyHomePage(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       () => Navigator.pushReplacement(
         context,
         // REPLACE WITH LOGIN OR REGISTER PAGE
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => const BottomNavController()),
       ),
     );
   }

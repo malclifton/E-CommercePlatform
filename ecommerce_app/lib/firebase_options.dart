@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '838255640625',
     projectId: 'group-project2-6a54d',
     authDomain: 'group-project2-6a54d.firebaseapp.com',
+    databaseURL: 'https://group-project2-6a54d-default-rtdb.firebaseio.com',
     storageBucket: 'group-project2-6a54d.appspot.com',
     measurementId: 'G-HEWQ42KWV6',
   );
@@ -55,6 +56,7 @@ class DefaultFirebaseOptions {
     appId: '1:838255640625:android:0aefbcc7688d5aa0f95510',
     messagingSenderId: '838255640625',
     projectId: 'group-project2-6a54d',
+    databaseURL: 'https://group-project2-6a54d-default-rtdb.firebaseio.com',
     storageBucket: 'group-project2-6a54d.appspot.com',
   );
 
@@ -63,6 +65,7 @@ class DefaultFirebaseOptions {
     appId: '1:838255640625:ios:71f70a9b666a15a6f95510',
     messagingSenderId: '838255640625',
     projectId: 'group-project2-6a54d',
+    databaseURL: 'https://group-project2-6a54d-default-rtdb.firebaseio.com',
     storageBucket: 'group-project2-6a54d.appspot.com',
     iosBundleId: 'com.example.ecommerceApp',
   );
@@ -72,6 +75,7 @@ class DefaultFirebaseOptions {
     appId: '1:838255640625:ios:71f70a9b666a15a6f95510',
     messagingSenderId: '838255640625',
     projectId: 'group-project2-6a54d',
+    databaseURL: 'https://group-project2-6a54d-default-rtdb.firebaseio.com',
     storageBucket: 'group-project2-6a54d.appspot.com',
     iosBundleId: 'com.example.ecommerceApp',
   );
@@ -82,7 +86,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '838255640625',
     projectId: 'group-project2-6a54d',
     authDomain: 'group-project2-6a54d.firebaseapp.com',
+    databaseURL: 'https://group-project2-6a54d-default-rtdb.firebaseio.com',
     storageBucket: 'group-project2-6a54d.appspot.com',
     measurementId: 'G-KP3G4V83G0',
   );
+
 }

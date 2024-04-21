@@ -37,6 +37,15 @@ dependencies:
   firebase_core: ^2.29.0
   firebase_auth: ^4.19.1
   ionicons: ^0.2.2
+  provider: ^6.1.2
+  badges: ^3.1.2
+  cloud_firestore: ^4.17.0
+  another_carousel_pro: ^1.0.2
+  flutter_carousel_widget: ^2.2.0
+  flutter_screenutil: ^5.9.0
+  carousel_slider: ^4.2.1
+  dots_indicator: ^3.0.0
+  image_picker:
 
 dev_dependencies:
   flutter_test:
