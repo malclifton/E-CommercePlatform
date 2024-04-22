@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'products.dart';
 
 class Cart extends ChangeNotifier {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   //list of products for $
   List<Product> productShop = [];
   //list of all items in user cart
@@ -32,12 +35,32 @@ class Cart extends ChangeNotifier {
   //add items to cart
   void addItemToCart(Product product) {
     userCart.add(product);
+    _updateUserCartInFirestore(userCart);
     notifyListeners();
+  }
+
+  Future<void> _updateUserCartInFirestore(List<Product> cartItems) async {
+    try {
+      // Get the current user ID or use a default user ID for testing
+      String userId = 'defaultUserId';
+
+      // Update the 'user_cart' collection for the user with their cart items
+      await _firestore.collection('user_cart').doc(userId).set({
+        'cart_items': cartItems.map((item) => item.toMap()).toList(),
+      });
+    } catch (e) {
+      print('Error updating user cart in Firestore: $e');
+    }
   }
 
   //remove item from cart
   void removeItemFromCart(Product product) {
     userCart.remove(product);
+    notifyListeners();
+  }
+
+  void clearCart() {
+    userCart.clear();
     notifyListeners();
   }
 }

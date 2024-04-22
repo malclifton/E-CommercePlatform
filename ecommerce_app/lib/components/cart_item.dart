@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'models/cart.dart';
-import 'models/products.dart';
+import '../models/cart.dart';
+import '../models/products.dart';
 
 // ignore: must_be_immutable
 class CartItem extends StatefulWidget {
@@ -34,7 +34,7 @@ class _CartItemState extends State<CartItem> {
       child: ListTile(
         leading: Image.network(widget.product.imagePath),
         title: Text(widget.product.name),
-        subtitle: Text(widget.product.price),
+        subtitle: Text('\$' + widget.product.price),
         trailing:
             IconButton(onPressed: removeItemFromCart, icon: Icon(Icons.delete)),
       ),

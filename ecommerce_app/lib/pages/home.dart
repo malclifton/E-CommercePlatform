@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/cart.dart';
+import '../models/liked.dart';
 import '../models/products.dart';
-import '../products_tile.dart';
+import '../components/products_tile.dart';
 import 'catalog.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   ProductService? _productService;
   Future<List<Product>>? _productsFuture;
-  //add product to cart
+  TextEditingController? _searchController;
+
   void addItemToCart(Product product) {
     Provider.of<Cart>(context, listen: false).addItemToCart(product);
 
@@ -30,11 +32,40 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void addItemToLiked(Product product) {
+    Provider.of<Liked>(context, listen: false).addItemToLiked(product);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Successfully added!'),
+        content: Text('Check your wishlist'),
+        backgroundColor: Colors.white,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _productService = ProductService();
-    _productsFuture = _productService?.getProducts();
+    _productsFuture = _productService!
+        .getProducts(); // Fetch products from the correct collection
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController?.dispose();
+    super.dispose();
+  }
+
+  List<Product> filterProducts(List<Product> products, String query) {
+    return products.where((product) {
+      final nameLower = product.name.toLowerCase();
+      final queryLower = query.toLowerCase();
+      return nameLower.contains(queryLower);
+    }).toList();
   }
 
   @override
@@ -52,13 +83,24 @@ class _HomeState extends State<Home> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Search',
-                  style: TextStyle(color: Colors.grey),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search products...',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      setState(() {}); // Trigger rebuild when text changes
+                    },
+                  ),
                 ),
-                Icon(
-                  Icons.search,
-                  color: Colors.grey,
+                IconButton(
+                  onPressed: () {
+                    _searchController!.clear();
+                    setState(() {});
+                  },
+                  icon: Icon(Icons.clear),
                 ),
               ],
             ),
@@ -103,20 +145,31 @@ class _HomeState extends State<Home> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error fetching data'));
                 } else {
-                  List<Product>? products = snapshot.data;
-                  if (products != null && products.isNotEmpty) {
-                    return ListView(
-                      scrollDirection:
-                          Axis.horizontal, // Set horizontal scroll direction
-                      children: products.map((product) {
+                  List<Product>? allProducts = snapshot.data;
+                  if (allProducts != null && allProducts.isNotEmpty) {
+                    List<Product> filteredProducts =
+                        _searchController!.text.isNotEmpty
+                            ? filterProducts(
+                                allProducts,
+                                _searchController!
+                                    .text) // Use the shared filter method
+                            : allProducts;
+
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filteredProducts.length,
+                      itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ProductsTile(
-                            product: product,
-                            onTap: () => addItemToCart(product),
+                            product: filteredProducts[index],
+                            onTap: () => addItemToCart(filteredProducts[index]),
+                            isLiked: false,
+                            onLikePressed: () =>
+                                addItemToLiked(filteredProducts[index]),
                           ),
                         );
-                      }).toList(),
+                      },
                     );
                   } else {
                     return Center(child: Text('No products available'));

@@ -58,7 +58,7 @@ class _BottomNavControllerState extends State<BottomNavController> {
             label: ("Catalog"),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_shopping_cart),
+            icon: Icon(Icons.shopping_cart),
             label: ("Cart"),
           ),
         ],
