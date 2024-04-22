@@ -3,9 +3,11 @@ import 'package:ecommerce_app/bottom_nav_controller.dart';
 import 'package:ecommerce_app/models/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'main_screen.dart'; // Assuming this is your home page
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
