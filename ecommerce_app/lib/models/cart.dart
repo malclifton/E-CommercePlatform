@@ -19,37 +19,39 @@ class Cart extends ChangeNotifier {
       if (_userId == null) {
         User? currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser != null) {
+          _userId = currentUser.uid;
           DocumentSnapshot userData = await FirebaseFirestore.instance
               .collection('credentials')
               .doc(currentUser.uid)
               .get();
-
-          _userId = userData['userId'];
-        }
-      }
-
-      if (_userId != null) {
-        DocumentSnapshot cartData =
-            await _firestore.collection('user_cart').doc(_userId!).get();
-
-        if (cartData.exists) {
-          // Check if 'cart_items' field exists and load cart items
-          Map<String, dynamic>? cartDataMap =
-              cartData.data() as Map<String, dynamic>?;
-          if (cartDataMap != null && cartDataMap.containsKey('cart_items')) {
-            List<dynamic> cartItemsData = cartDataMap['cart_items'];
-            userCart =
-                cartItemsData.map((item) => Product.fromMap(item)).toList();
-            notifyListeners();
+          if (userData.exists) {
+            _userId = userData['userId'];
+            DocumentSnapshot cartData =
+                await _firestore.collection('user_cart').doc(_userId!).get();
+            if (cartData.exists) {
+              Map<String, dynamic>? cartDataMap =
+                  cartData.data() as Map<String, dynamic>?;
+              if (cartDataMap != null &&
+                  cartDataMap.containsKey('cart_items')) {
+                List<dynamic> cartItemsData = cartDataMap['cart_items'];
+                userCart =
+                    cartItemsData.map((item) => Product.fromMap(item)).toList();
+                notifyListeners();
+              } else {
+                print(
+                    'Error: cart_items field does not exist in user cart document');
+              }
+            } else {
+              print('User cart document does not exist, creating...');
+              await _firestore.collection('user_cart').doc(_userId!).set({
+                'cart_items': [],
+              });
+              print('User cart document created.');
+            }
           } else {
-            print(
-                'Error: cart_items field does not exist in user cart document');
+            print('Error: User data not found');
           }
-        } else {
-          print('Error: User cart document does not exist');
         }
-      } else {
-        print('Error: User ID is null');
       }
     } catch (e) {
       print('Error loading user cart: $e');
@@ -101,7 +103,7 @@ class Cart extends ChangeNotifier {
   double calculateTotalPrice() {
     double totalPrice = 0;
     for (var item in userCart) {
-      double itemPrice = double.parse(item.price);
+      double itemPrice = double.tryParse(item.price) ?? 0;
       totalPrice += itemPrice;
     }
     return totalPrice;
