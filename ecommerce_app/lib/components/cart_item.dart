@@ -17,7 +17,6 @@ class CartItem extends StatefulWidget {
 }
 
 class _CartItemState extends State<CartItem> {
-  //remove item from cart
   void removeItemFromCart() {
     Provider.of<Cart>(context, listen: false)
         .removeItemFromCart(widget.product);
@@ -30,13 +29,13 @@ class _CartItemState extends State<CartItem> {
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
       ),
-      margin: EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         leading: Image.network(widget.product.imagePath),
         title: Text(widget.product.name),
-        subtitle: Text('\$' + widget.product.price),
-        trailing:
-            IconButton(onPressed: removeItemFromCart, icon: Icon(Icons.delete)),
+        subtitle: Text('\$${widget.product.price}'),
+        trailing: IconButton(
+            onPressed: removeItemFromCart, icon: const Icon(Icons.delete)),
       ),
     );
   }

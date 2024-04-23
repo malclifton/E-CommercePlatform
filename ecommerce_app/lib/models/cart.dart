@@ -1,38 +1,61 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'products.dart';
 
 class Cart extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? _userId;
+  final bool _cartLoaded = false;
 
-  //list of products for $
   List<Product> productShop = [];
-  //list of all items in user cart
   List<Product> userCart = [];
 
-  final ProductService _productService = ProductService();
-
-  Future<void> getProductsFromFirebase() async {
+  Future<void> loadUserCart() async {
     try {
-      List<Product> products = await _productService.getProducts();
-      productShop = products;
+      if (_userId == null) {
+        User? currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null) {
+          DocumentSnapshot userData = await FirebaseFirestore.instance
+              .collection('credentials')
+              .doc(currentUser.uid)
+              .get();
+
+          _userId = userData['userId'];
+        }
+      }
+
+      if (_userId != null) {
+        DocumentSnapshot cartData =
+            await _firestore.collection('user_cart').doc(_userId!).get();
+
+        if (cartData.exists) {
+          // Check if 'cart_items' field exists and load cart items
+          Map<String, dynamic>? cartDataMap =
+              cartData.data() as Map<String, dynamic>?;
+          if (cartDataMap != null && cartDataMap.containsKey('cart_items')) {
+            List<dynamic> cartItemsData = cartDataMap['cart_items'];
+            userCart =
+                cartItemsData.map((item) => Product.fromMap(item)).toList();
+            notifyListeners();
+          } else {
+            print(
+                'Error: cart_items field does not exist in user cart document');
+          }
+        } else {
+          print('Error: User cart document does not exist');
+        }
+      } else {
+        print('Error: User ID is null');
+      }
     } catch (e) {
-      print('Error fetching products: $e');
+      print('Error loading user cart: $e');
     }
   }
 
-  //get list of products for $
-  List<Product> getProductList() {
-    return productShop;
-  }
-
-  //get cart
-  List<Product> getCartList() {
-    return userCart;
-  }
-
-  //add items to cart
   void addItemToCart(Product product) {
     userCart.add(product);
     _updateUserCartInFirestore(userCart);
@@ -41,11 +64,8 @@ class Cart extends ChangeNotifier {
 
   Future<void> _updateUserCartInFirestore(List<Product> cartItems) async {
     try {
-      // Get the current user ID or use a default user ID for testing
-      String userId = 'defaultUserId';
-
       // Update the 'user_cart' collection for the user with their cart items
-      await _firestore.collection('user_cart').doc(userId).set({
+      await _firestore.collection('user_cart').doc(_userId!).set({
         'cart_items': cartItems.map((item) => item.toMap()).toList(),
       });
     } catch (e) {
@@ -53,14 +73,37 @@ class Cart extends ChangeNotifier {
     }
   }
 
-  //remove item from cart
   void removeItemFromCart(Product product) {
     userCart.remove(product);
+    _updateUserCartInFirestore(userCart);
     notifyListeners();
   }
 
-  void clearCart() {
-    userCart.clear();
-    notifyListeners();
+  void clearCart() async {
+    try {
+      userCart.clear();
+      // Delete the 'user_cart' document from Firestore
+      await _firestore.collection('user_cart').doc(_userId!).delete();
+      notifyListeners();
+    } catch (e) {
+      print('Error clearing cart and deleting document: $e');
+    }
+  }
+
+  List<Product> getCartList() {
+    return userCart;
+  }
+
+  bool isCartLoaded() {
+    return _cartLoaded;
+  }
+
+  double calculateTotalPrice() {
+    double totalPrice = 0;
+    for (var item in userCart) {
+      double itemPrice = double.parse(item.price);
+      totalPrice += itemPrice;
+    }
+    return totalPrice;
   }
 }

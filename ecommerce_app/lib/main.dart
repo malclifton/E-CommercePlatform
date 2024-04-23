@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:ecommerce_app/bottom_nav_controller.dart';
+import 'package:ecommerce_app/auth/auth_page.dart';
 import 'package:ecommerce_app/models/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,7 +16,7 @@ void main() async {
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => Cart()),
       ChangeNotifierProvider(create: (_) => Liked()),
-    ], child: MyApp()),
+    ], child: const MyApp()),
   );
 }
 
@@ -25,25 +25,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => Cart(),
-      builder: (context, child) => const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: MyHomePage(),
+    return MaterialApp(
+      title: 'ECommerce App',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
       ),
+      home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _MyHomePageState createState() => _MyHomePageState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -51,8 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const Duration(seconds: 3),
       () => Navigator.pushReplacement(
         context,
-        // REPLACE WITH LOGIN OR REGISTER PAGE
-        MaterialPageRoute(builder: (context) => const BottomNavController()),
+        MaterialPageRoute(builder: (context) => const AuthPage()),
       ),
     );
   }
@@ -66,6 +66,20 @@ class _MyHomePageState extends State<MyHomePage> {
           'assets/images/indulge.png',
           height: MediaQuery.of(context).size.height * 0.3,
         ),
+      ),
+    );
+  }
+}
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: AuthPage(),
       ),
     );
   }

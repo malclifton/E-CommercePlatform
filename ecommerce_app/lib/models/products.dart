@@ -19,12 +19,12 @@ class ProductService {
     QuerySnapshot querySnapshot1 = await _firestore
         .collection('products')
         .where('product-name', isGreaterThanOrEqualTo: query)
-        .where('product-name', isLessThan: query + 'z')
+        .where('product-name', isLessThan: '${query}z')
         .get();
     QuerySnapshot querySnapshot2 = await _firestore
         .collection('all_products')
         .where('product-name', isGreaterThanOrEqualTo: query)
-        .where('product-name', isLessThan: query + 'z')
+        .where('product-name', isLessThan: '${query}z')
         .get();
 
     List<Product> products1 =

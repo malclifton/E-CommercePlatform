@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +8,10 @@ import '../models/products.dart';
 import '../components/products_tile.dart';
 
 class Catalog extends StatefulWidget {
+  const Catalog({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _CatalogState createState() => _CatalogState();
 }
 
@@ -15,13 +19,14 @@ class _CatalogState extends State<Catalog> {
   ProductService? _productService;
   Future<List<Product>>? _productsFuture;
   TextEditingController? _searchController;
+  String userId =
+      FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user's ID
 
   @override
   void initState() {
     super.initState();
     _productService = ProductService();
-    _productsFuture =
-        _productService!.getAllProducts(); // Fetch all products initially
+    _productsFuture = _productService!.getAllProducts();
     _searchController = TextEditingController();
   }
 
@@ -42,7 +47,7 @@ class _CatalogState extends State<Catalog> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => const AlertDialog(
         title: Text('Successfully added!'),
         content: Text('Check your cart'),
         backgroundColor: Colors.white,
@@ -51,11 +56,11 @@ class _CatalogState extends State<Catalog> {
   }
 
   void addItemToLiked(BuildContext context, Product product) {
-    context.read<Liked>().addItemToLiked(product); // Use context.read here
+    context.read<Liked>().addItemToLiked(product);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => const AlertDialog(
         title: Text('Successfully added!'),
         content: Text('Check your Wishlist'),
         backgroundColor: Colors.white,
@@ -67,7 +72,7 @@ class _CatalogState extends State<Catalog> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Catalog',
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -79,8 +84,8 @@ class _CatalogState extends State<Catalog> {
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 25),
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.symmetric(horizontal: 25),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
@@ -91,7 +96,7 @@ class _CatalogState extends State<Catalog> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Search products...',
                       border: InputBorder.none,
                     ),
@@ -103,7 +108,7 @@ class _CatalogState extends State<Catalog> {
                     _searchController!.clear();
                     _searchProducts('');
                   },
-                  icon: Icon(Icons.clear),
+                  icon: const Icon(Icons.clear),
                 ),
               ],
             ),
@@ -113,9 +118,9 @@ class _CatalogState extends State<Catalog> {
               future: _productsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error fetching data'));
+                  return const Center(child: Text('Error fetching data'));
                 } else {
                   List<Product>? products = snapshot.data;
                   if (products != null && products.isNotEmpty) {
@@ -136,7 +141,7 @@ class _CatalogState extends State<Catalog> {
                       },
                     );
                   } else {
-                    return Center(child: Text('No products available'));
+                    return const Center(child: Text('No products available'));
                   }
                 }
               },

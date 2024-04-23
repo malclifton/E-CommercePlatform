@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +12,7 @@ class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomeState createState() => _HomeState();
 }
 
@@ -18,13 +20,14 @@ class _HomeState extends State<Home> {
   ProductService? _productService;
   Future<List<Product>>? _productsFuture;
   TextEditingController? _searchController;
+  String userId =
+      FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user's ID
 
   void addItemToCart(Product product) {
     Provider.of<Cart>(context, listen: false).addItemToCart(product);
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => const AlertDialog(
         title: Text('Successfully added!'),
         content: Text('Check your cart'),
         backgroundColor: Colors.white,
@@ -37,7 +40,7 @@ class _HomeState extends State<Home> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => const AlertDialog(
         title: Text('Successfully added!'),
         content: Text('Check your wishlist'),
         backgroundColor: Colors.white,
@@ -49,8 +52,8 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _productService = ProductService();
-    _productsFuture = _productService!
-        .getProducts(); // Fetch products from the correct collection
+    _productsFuture =
+        _productService!.getProducts(); // Fetch products from the collection
     _searchController = TextEditingController();
   }
 
@@ -74,8 +77,8 @@ class _HomeState extends State<Home> {
       builder: (context, value, child) => Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 25),
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.symmetric(horizontal: 25),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
@@ -86,12 +89,12 @@ class _HomeState extends State<Home> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Search products...',
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
-                      setState(() {}); // Trigger rebuild when text changes
+                      setState(() {});
                     },
                   ),
                 ),
@@ -100,12 +103,12 @@ class _HomeState extends State<Home> {
                     _searchController!.clear();
                     setState(() {});
                   },
-                  icon: Icon(Icons.clear),
+                  icon: const Icon(Icons.clear),
                 ),
               ],
             ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.symmetric(vertical: 25.0),
             child: Text("find your next treasure..."),
           ),
@@ -114,7 +117,7 @@ class _HomeState extends State<Home> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "Trending Items🌟",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                 ),
@@ -122,10 +125,10 @@ class _HomeState extends State<Home> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Catalog()),
+                      MaterialPageRoute(builder: (context) => const Catalog()),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     "See all",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -141,19 +144,16 @@ class _HomeState extends State<Home> {
               future: _productsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error fetching data'));
+                  return const Center(child: Text('Error fetching data'));
                 } else {
                   List<Product>? allProducts = snapshot.data;
                   if (allProducts != null && allProducts.isNotEmpty) {
-                    List<Product> filteredProducts =
-                        _searchController!.text.isNotEmpty
-                            ? filterProducts(
-                                allProducts,
-                                _searchController!
-                                    .text) // Use the shared filter method
-                            : allProducts;
+                    List<Product> filteredProducts = _searchController!
+                            .text.isNotEmpty
+                        ? filterProducts(allProducts, _searchController!.text)
+                        : allProducts;
 
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -172,14 +172,14 @@ class _HomeState extends State<Home> {
                       },
                     );
                   } else {
-                    return Center(child: Text('No products available'));
+                    return const Center(child: Text('No products available'));
                   }
                 }
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(
+          const Padding(
+            padding: EdgeInsets.only(
               top: 25.0,
               left: 25.0,
               right: 25.0,

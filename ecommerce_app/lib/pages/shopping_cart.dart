@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,8 +7,38 @@ import '../components/cart_item.dart';
 import '../models/cart.dart';
 import '../models/products.dart';
 
-class ShoppingCart extends StatelessWidget {
+class ShoppingCart extends StatefulWidget {
   const ShoppingCart({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ShoppingCartState createState() => _ShoppingCartState();
+}
+
+class _ShoppingCartState extends State<ShoppingCart> {
+  void storeOrderInFirestore(List<Product> products) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
+
+    if (userId != null) {
+      // Create a new document under 'user_orders' with a unique ID
+      final newOrderRef =
+          FirebaseFirestore.instance.collection('user_orders').doc();
+      final orderDate = DateTime.now();
+
+      await newOrderRef.set({
+        'user_id': userId,
+        'order_date': orderDate,
+        'products': products.map((product) => product.toMap()).toList(),
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<Cart>(context, listen: false).loadUserCart();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,22 +53,39 @@ class ShoppingCart extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     "My Cart",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '\$${cart.calculateTotalPrice().toStringAsFixed(2)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                   IconButton(
                     onPressed: () {
+                      storeOrderInFirestore(cart.getCartList());
                       cart.clearCart();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text(
                               'Purchase Complete! Your items are on the way!'),
                         ),
                       );
                     },
-                    icon: Icon(Icons.shopping_cart_checkout),
-                    tooltip: 'Clear Cart',
+                    icon: const Icon(Icons.shopping_cart_checkout),
+                    tooltip: 'Checkout',
                   ),
                 ],
               ),
@@ -46,31 +94,10 @@ class ShoppingCart extends StatelessWidget {
               height: 20,
             ),
             Expanded(
-              child: StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('user_cart')
-                    .doc('defaultUserId') // Adjust with actual user ID
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (!snapshot.hasData ||
-                      snapshot.data!.data() == null) {
-                    return Center(child: Text('No items in cart'));
-                  } else {
-                    // Cast data to Map<String, dynamic> to avoid '[]' operator error
-                    Map<String, dynamic> cartData =
-                        snapshot.data!.data() as Map<String, dynamic>;
-                    List<dynamic> cartItems = cartData['cart_items'];
-                    List<Product> products =
-                        cartItems.map((item) => Product.fromMap(item)).toList();
-                    return ListView.builder(
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return CartItem(product: products[index]);
-                      },
-                    );
-                  }
+              child: ListView.builder(
+                itemCount: cart.getCartList().length,
+                itemBuilder: (context, index) {
+                  return CartItem(product: cart.getCartList()[index]);
                 },
               ),
             ),

@@ -18,11 +18,11 @@ class BottomNavController extends StatefulWidget {
 
 class _BottomNavControllerState extends State<BottomNavController> {
   final _pages = [
-    Profile(),
-    Favorite(),
-    Home(),
-    Catalog(),
-    ShoppingCart(),
+    const ProfileScreen(),
+    const Favorite(),
+    const Home(),
+    const Catalog(),
+    const ShoppingCart(),
   ];
   var _currentIndex = 2;
 

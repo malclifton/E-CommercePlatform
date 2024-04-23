@@ -3,54 +3,65 @@ import 'package:provider/provider.dart';
 import 'package:ecommerce_app/models/liked.dart';
 import 'package:ecommerce_app/components/liked_item.dart';
 
-class Favorite extends StatelessWidget {
-  const Favorite({Key? key});
+class Favorite extends StatefulWidget {
+  const Favorite({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _FavoriteState createState() => _FavoriteState();
+}
+
+class _FavoriteState extends State<Favorite> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<Liked>(context, listen: false).loadUserFavorites();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Liked>(
-      builder: (context, liked, child) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "My Wishlist",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.refresh),
-                    onPressed: () async {
-                      await liked.loadUserFavorites(); // Refresh user favorites
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: liked.userLiked.length,
-                itemBuilder: (context, index) {
-                  return LikedItem(
-                    product: liked.userLiked[index],
-                    onRemove: () async {
-                      await liked.removeItemFromLiked(liked.userLiked[index]);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+    final liked = Provider.of<Liked>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'My Wishlist',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
         ),
+        centerTitle: true,
       ),
+      body: liked.userLiked.isEmpty
+          ? const Center(child: Text('No items in your wishlist'))
+          : ListView.builder(
+              itemCount: liked.userLiked.length,
+              itemBuilder: (context, index) {
+                final product = liked.userLiked[index];
+                return Dismissible(
+                  key: Key(product.name),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) {
+                    liked.removeItemFromLiked(product);
+                    liked.deleteItemFromFirestore(product);
+                  },
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    color: Colors.red,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  child: LikedItem(
+                    product: product,
+                    onRemove: () {
+                      liked.removeItemFromLiked(product);
+                      liked.deleteItemFromFirestore(product);
+                    },
+                  ),
+                );
+              },
+            ),
     );
   }
 }

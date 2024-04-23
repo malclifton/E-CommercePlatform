@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../models/products.dart';
 
@@ -8,16 +6,15 @@ import '../models/products.dart';
 class ProductsTile extends StatefulWidget {
   Product product;
   void Function()? onTap;
-  void Function()? onLikePressed; // Callback for like button
+  void Function()? onLikePressed;
   bool isLiked;
 
   ProductsTile(
-      {Key? key,
+      {super.key,
       required this.product,
       required this.onTap,
       required this.isLiked,
-      required this.onLikePressed})
-      : super(key: key);
+      required this.onLikePressed});
 
   @override
   State<ProductsTile> createState() => _ProductsTileState();
@@ -27,7 +24,7 @@ class _ProductsTileState extends State<ProductsTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 25),
+      margin: const EdgeInsets.only(left: 25),
       width: 350,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -36,7 +33,6 @@ class _ProductsTileState extends State<ProductsTile> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Like button in top left corner
           Align(
             alignment: Alignment.topLeft,
             child: GestureDetector(
@@ -45,7 +41,7 @@ class _ProductsTileState extends State<ProductsTile> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: widget.isLiked ? Colors.red : Colors.black,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(12),
                     bottomRight: Radius.circular(12),
                   ),
@@ -57,7 +53,7 @@ class _ProductsTileState extends State<ProductsTile> {
               ),
             ),
           ),
-          Container(
+          SizedBox(
             height: 210,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -85,14 +81,14 @@ class _ProductsTileState extends State<ProductsTile> {
                   children: [
                     Text(
                       widget.product.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      '\$' + widget.product.price,
+                      '\$${widget.product.price}',
                       style: const TextStyle(
                         color: Colors.grey,
                       ),
@@ -103,14 +99,14 @@ class _ProductsTileState extends State<ProductsTile> {
                   onTap: widget.onTap,
                   child: Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(12),
                         bottomRight: Radius.circular(12),
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.add,
                       color: Colors.white,
                     ),

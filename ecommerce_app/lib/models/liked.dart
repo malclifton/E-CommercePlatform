@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -5,32 +8,33 @@ import 'products.dart';
 
 class Liked extends ChangeNotifier {
   List<Product> userLiked = [];
+  String? _userId;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> loadUserFavorites() async {
     try {
-      // Get the current user ID or use a default user ID for testing
-      String userId = 'defaultUserId';
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        _userId = currentUser.uid;
+        DocumentSnapshot likedData =
+            await _firestore.collection('user_favorites').doc(_userId).get();
 
-      // Fetch user favorites from Firestore
-      DocumentSnapshot doc =
-          await _firestore.collection('user_favorite').doc(userId).get();
-      if (doc.exists) {
-        // Explicitly cast data to Map<String, dynamic>
-        Map<String, dynamic>? favoritesData =
-            doc.data() as Map<String, dynamic>?;
-
-        // Check if favoritesData is not null and contains 'favorites' key
-        if (favoritesData != null && favoritesData.containsKey('favorites')) {
-          List<dynamic> favoritesList =
-              favoritesData['favorites'] as List<dynamic>;
+        if (likedData.exists) {
+          List<dynamic> likedItemsData = likedData['liked_items'];
           userLiked =
-              favoritesList.map((item) => Product.fromMap(item)).toList();
-          notifyListeners();
+              likedItemsData.map((item) => Product.fromMap(item)).toList();
+        } else {
+          await _firestore.collection('user_favorites').doc(_userId).set({
+            'liked_items': [],
+          });
+          userLiked = [];
         }
+        notifyListeners();
+      } else {
+        print('Error: Current user is null');
       }
     } catch (e) {
-      print('Error loading user favorites: $e');
+      print('Error loading user liked: $e');
     }
   }
 
@@ -56,15 +60,26 @@ class Liked extends ChangeNotifier {
 
   Future<void> _updateUserFavoritesInFirestore() async {
     try {
-      // Get the current user ID or use a default user ID for testing
-      String userId = 'defaultUserId';
-
-      // Update the 'user_favorite' collection for the user with their liked items
-      await _firestore.collection('user_favorite').doc(userId).set({
-        'favorites': userLiked.map((item) => item.toMap()).toList(),
+      await _firestore.collection('user_favorites').doc(_userId).set({
+        'liked_items': userLiked.map((item) => item.toMap()).toList(),
       });
     } catch (e) {
       print('Error updating user favorites in Firestore: $e');
+    }
+  }
+
+  Future<void> deleteItemFromFirestore(Product product) async {
+    try {
+      await _firestore
+          .collection('user_favorites')
+          .doc(_userId)
+          .update({
+            'liked_items': FieldValue.arrayRemove([product.toMap()])
+          })
+          .then((value) => print('Item deleted from Firestore'))
+          .catchError((error) => print('Failed to delete item: $error'));
+    } catch (e) {
+      print('Error deleting item from Firestore: $e');
     }
   }
 }
